@@ -1,0 +1,11 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "plugins": ["prettier-plugin-prisma", "@ianvs/prettier-plugin-sort-imports"],
+  "importOrder": ["^react$", "^next(.*)$", "^express$", "^@?\\w", "^(@|~)/(.*)$", "^[./]"],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true
+}
