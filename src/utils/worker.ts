@@ -15,11 +15,18 @@ const worker = new Worker(
   "pdf-upload-queue",
   async (job) => {
     try {
-      const { filename, path } = job.data;
+      const { filename, path, fileBuffer, mimeType } = job.data;
       console.log("Processing job:", job.id, "filename:", filename);
       console.log("path:", path);
 
-      const loader = new PDFLoader(path);
+      // Convert base64 buffer back to Buffer
+      const buffer = Buffer.from(fileBuffer, "base64");
+
+      // Create a Blob from the buffer for PDFLoader
+      const blob = new globalThis.Blob([buffer], { type: mimeType });
+
+      // Use PDFLoader with the blob instead of URL
+      const loader = new PDFLoader(blob);
       const docs = await loader.load();
       console.log("Loaded documents:", docs.length);
 

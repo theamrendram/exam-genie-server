@@ -9,8 +9,9 @@ interface RequestWithAuth extends Request {
 
 const uploadPDF: RequestHandler = async (req, res) => {
   console.log("calling upload controller");
+  console.log("req.file:", req.file);
   const file = req.file;
-  const userId = (req as unknown as RequestWithAuth).auth?.userId;
+  const userId = (req as unknown as RequestWithAuth).auth().userId;
   const { title, subject, semester } = req.body;
 
   console.log("file: ", file);
@@ -41,6 +42,8 @@ const uploadPDF: RequestHandler = async (req, res) => {
   const job = await queue.add("pdf-upload-job", {
     filename: file.originalname,
     path: uploadedFile.secure_url,
+    fileBuffer: file.buffer.toString("base64"),
+    mimeType: file.mimetype,
   });
   console.log("job: ", job);
   res.json({ message: "File uploaded successfully", jobId: job.id });

@@ -1,15 +1,41 @@
-import dotenv from "dotenv";
-dotenv.config();
 import express from "express";
 import { clerkMiddleware, requireAuth } from "@clerk/express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import dotenv from "dotenv";
 import multer from "multer";
-import generateContentController from "./routes/generate.route";
-import uploadController from "./routes/upload.route";
+import generateContentRoutes from "./routes/generate.route";
+import uploadRoutes from "./routes/upload.route";
+import userRoutes from "./routes/user.route";
 
+dotenv.config();
 
 const app = express();
+
+const storage = multer.memoryStorage();
+const fileFilter = (
+  req: any,
+  file: Express.Multer.File,
+  cb: (error: Error | null, acceptFile: boolean) => void,
+) => {
+  if (file.mimetype === "application/pdf") {
+    cb(null, true);
+  } else {
+    cb(new Error("Only PDF files are allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, callback: multer.FileFilterCallback) => {
+    if (file.mimetype === "application/pdf") {
+      callback(null, true);
+    } else {
+      callback(new Error("Only PDF files are allowed!"));
+    }
+  },
+});
+
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -23,8 +49,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(clerkMiddleware());
 
-app.use("/api/generate", requireAuth(), generateContentController);
-app.use("/api/upload", multer().single("file"), uploadController);
+// Routes
+app.use("/api/upload", requireAuth(), upload.single("file"), uploadRoutes);
+app.use("/api/generate", requireAuth(), generateContentRoutes);
+app.use("/api/users", userRoutes);
+
 app.get("/", (req, res) => {
   res.send("server is running...");
 });
