@@ -10,29 +10,43 @@ const generateContentController: RequestHandler = async (req, res) => {
   const { message } = req.body as { message: string };
   console.dir((req as RequestWithAuth).auth, { depth: null });
 
-  const response = await generateContent(message);
-  res.json({ response: response });
+  try {
+    const response = await generateContent(message);
+    res.json({ response: response });
+  } catch (error) {
+    console.error("Error in generateContentController:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 const startConversation: RequestHandler = async (req, res) => {
   const { message } = req.body as { message: string };
   const userId = (req as RequestWithAuth).auth?.userId;
 
-  const [response, title] = await Promise.all([
-    generateContent(message),
-    generateConversationTitle(message),
-  ]);
+  try {
+    const [response, title] = await Promise.all([
+      generateContent(message),
+      generateConversationTitle(message),
+    ]);
 
-  const conversation = await prisma.conversation.create({
-    data: {
-      title,
-      user: {
-        connect: { id: userId },
+    if (!userId) {
+      return res.json({ response, title, conversationId: null });
+    }
+
+    const conversation = await prisma.conversation.create({
+      data: {
+        title,
+        user: {
+          connect: { id: userId },
+        },
       },
-    },
-  });
+    });
 
-  res.json({ response, title, conversationId: conversation.id });
+    res.json({ response, title, conversationId: conversation.id });
+  } catch (error) {
+    console.error("Error in startConversation:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 export { generateContentController, startConversation };

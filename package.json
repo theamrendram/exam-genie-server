@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon",
+    "dev:worker": "nodemon src/utils/worker.ts",
     "format:prisma": "npx prisma format --schema prisma/schema.prisma",
     "format": "prettier --write .",
     "lint:format": "prettier --check ."
@@ -16,20 +17,30 @@
   "dependencies": {
     "@clerk/express": "^1.7.31",
     "@google/genai": "^1.19.0",
+    "@langchain/community": "^0.3.56",
+    "@langchain/core": "^0.3.77",
+    "@langchain/google-genai": "^0.2.18",
+    "@langchain/qdrant": "^0.1.3",
     "@prisma/client": "^6.16.2",
+    "@qdrant/js-client-rest": "^1.15.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "bullmq": "^5.58.7",
+    "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
     "prisma": "^6.16.2"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "prettier-plugin-prisma": "^5.0.0",
