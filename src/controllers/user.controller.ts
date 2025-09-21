@@ -153,6 +153,68 @@ const createUser: RequestHandler = async (req, res) => {
   }
 };
 
+// Sync user from Clerk (for webhook or manual sync)
+const syncUserFromClerk: RequestHandler = async (req, res) => {
+  try {
+    const { email, name, imageUrl, clerkId } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      // Update existing user
+      const updatedUser = await prisma.user.update({
+        where: { email },
+        data: {
+          name: name || existingUser.name,
+          imageUrl: imageUrl || existingUser.imageUrl,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          imageUrl: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return res.json({ message: "User updated", user: updatedUser });
+    }
+
+    // Create new user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        name,
+        imageUrl,
+        role: "USER",
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        imageUrl: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    res.status(201).json({ message: "User created", user });
+  } catch (error) {
+    console.error("Error syncing user from Clerk:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // Update user
 const updateUser: RequestHandler = async (req, res) => {
   try {
@@ -337,6 +399,7 @@ export {
   getUserById,
   getCurrentUser,
   createUser,
+  syncUserFromClerk,
   updateUser,
   updateCurrentUser,
   deleteUser,

@@ -9,6 +9,7 @@ import {
   getUserConversations,
   getUserMessages,
   getUserPDFs,
+  syncUserFromClerk,
   updateCurrentUser,
   updateUser,
 } from "../controllers/user.controller";
@@ -18,6 +19,7 @@ const router = Router();
 
 // Public routes (no auth required)
 router.post("/", createUser);
+router.post("/sync", syncUserFromClerk);
 
 // Protected routes (require authentication)
 router.get("/me", requireAuth(), getCurrentUser);

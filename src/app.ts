@@ -7,6 +7,7 @@ import multer from "multer";
 import generateContentRoutes from "./routes/generate.route";
 import uploadRoutes from "./routes/upload.route";
 import userRoutes from "./routes/user.route";
+import webhookRoutes from "./routes/webhook.route";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use(clerkMiddleware());
 app.use("/api/upload", requireAuth(), upload.single("file"), uploadRoutes);
 app.use("/api/generate", requireAuth(), generateContentRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/webhooks", webhookRoutes);
 
 app.get("/", (req, res) => {
   res.send("server is running...");
