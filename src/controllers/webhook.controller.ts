@@ -86,6 +86,7 @@ const handleWebhook: RequestHandler = async (req, res) => {
 
 // Handle user creation
 async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
+  console.log("handleUserCreated", data);
   try {
     const email = data.email_addresses[0]?.email_address;
 
@@ -125,6 +126,7 @@ async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
 
 // Handle user updates
 async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
+  console.log("handleUserUpdated", data);
   try {
     const email = data.email_addresses[0]?.email_address;
 
@@ -162,6 +164,7 @@ async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
 
 // Handle user deletion
 async function handleUserDeleted(data: ClerkWebhookEvent["data"]) {
+  console.log("handleUserDeleted", data);
   try {
     const email = data.email_addresses[0]?.email_address;
 

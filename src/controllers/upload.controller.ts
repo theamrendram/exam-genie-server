@@ -11,7 +11,8 @@ const uploadPDF: RequestHandler = async (req, res) => {
   console.log("calling upload controller");
   console.log("req.file:", req.file);
   const file = req.file;
-  const userId = (req as unknown as RequestWithAuth).auth().userId;
+  // const userId = (req as unknown as RequestWithAuth).auth().userId;
+  const userId = 1111;
   const { title, subject, semester } = req.body;
 
   console.log("file: ", file);
@@ -32,9 +33,6 @@ const uploadPDF: RequestHandler = async (req, res) => {
       userId: userId,
       subject: subject,
       semester: semester,
-      user: {
-        connect: { id: userId },
-      },
     },
   });
 
@@ -50,7 +48,8 @@ const uploadPDF: RequestHandler = async (req, res) => {
 };
 
 const getPDFsByUserId: RequestHandler = async (req, res) => {
-  const userId = (req as unknown as RequestWithAuth).auth?.userId;
+  // const userId = (req as unknown as RequestWithAuth).auth?.userId;
+  const userId = 1111;
   const pdfs = await prisma.uploadedPDF.findMany({
     where: { userId: userId },
   });

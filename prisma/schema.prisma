@@ -57,6 +57,8 @@ model uploadedPDF {
   updatedAt DateTime  @updatedAt
 }
 
+
+
 enum Role {
   USER
   ADMIN

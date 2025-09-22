@@ -8,7 +8,9 @@
     "dev:worker": "nodemon src/utils/worker.ts",
     "format:prisma": "npx prisma format --schema prisma/schema.prisma",
     "format": "prettier --write .",
-    "lint:format": "prettier --check ."
+    "lint:format": "prettier --check .",
+    "seed": "ts-node prisma/seed.ts",
+    "db:seed": "npm run seed"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
     "prisma": "^6.16.2",
     "svix": "^1.76.1"
   },

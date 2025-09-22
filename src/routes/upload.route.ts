@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { uploadPDF, getPDFsByUserId } from "../controllers/upload.controller";
+import { getPDFsByUserId, uploadPDF } from "../controllers/upload.controller";
 
 const router = Router();
 

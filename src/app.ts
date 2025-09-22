@@ -48,13 +48,13 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/users", userRoutes);
+app.use("/api/webhooks", webhookRoutes);
 app.use(clerkMiddleware());
 
 // Routes
 app.use("/api/upload", requireAuth(), upload.single("file"), uploadRoutes);
 app.use("/api/generate", requireAuth(), generateContentRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/webhooks", webhookRoutes);
 
 app.get("/", (req, res) => {
   res.send("server is running...");
