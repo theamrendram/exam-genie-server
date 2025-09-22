@@ -9,7 +9,7 @@ interface RequestWithAuth extends Request {
 
 const sendMessage: RequestHandler = async (req, res) => {
   const { message, conversationId } = req.body as { message: string; conversationId: number };
-//   const userId = (req as RequestWithAuth).auth?.userId;
+  //   const userId = (req as RequestWithAuth).auth?.userId;
   const userId = "1111";
 
   try {
@@ -47,8 +47,23 @@ const sendMessage: RequestHandler = async (req, res) => {
     const contextResults = await retrieveData(message, 5);
     const context = contextResults.map((result: any) => result.pageContent).join("\n\n");
 
-    // Generate response with context
-    const response = await generateContent(message, context);
+    // Fetch complete conversation history
+    const chatHistory = await prisma.message.findMany({
+      where: {
+        conversationId: conversationId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      select: {
+        content: true,
+        sender: true,
+        createdAt: true,
+      },
+    });
+
+    // Generate response with context and chat history
+    const response = await generateContent(message, context, chatHistory);
 
     // Save assistant message to database
     const assistantMessage = await prisma.message.create({
@@ -82,7 +97,7 @@ const sendMessage: RequestHandler = async (req, res) => {
 
 const getConversation: RequestHandler = async (req, res) => {
   const { conversationId } = req.params;
-//   const userId = (req as RequestWithAuth).auth?.userId;
+  //   const userId = (req as RequestWithAuth).auth?.userId;
   const userId = "1111";
 
   try {
@@ -129,7 +144,7 @@ const getConversation: RequestHandler = async (req, res) => {
 };
 
 const getConversations: RequestHandler = async (req, res) => {
-//   const userId = (req as RequestWithAuth).auth?.userId;
+  //   const userId = (req as RequestWithAuth).auth?.userId;
   const userId = "1111";
 
   try {

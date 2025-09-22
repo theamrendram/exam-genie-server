@@ -4,7 +4,17 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
-async function generateContent(userInput: string, context?: string): Promise<string> {
+interface ChatMessage {
+  content: string;
+  sender: "USER" | "ASSISTANT" | "SYSTEM";
+  createdAt: Date;
+}
+
+async function generateContent(
+  userInput: string,
+  context?: string,
+  chatHistory?: ChatMessage[],
+): Promise<string> {
   let prompt = userInput;
 
   if (context) {
@@ -18,9 +28,35 @@ User Question: ${userInput}
 Please provide a helpful and accurate response based on the context provided.`;
   }
 
+  // Prepare contents array for Gemini API with chat history
+  const contents = [];
+
+  // Add chat history if provided
+  if (chatHistory && chatHistory.length > 0) {
+    for (const message of chatHistory) {
+      if (message.sender === "USER") {
+        contents.push({
+          role: "user",
+          parts: [{ text: message.content }],
+        });
+      } else if (message.sender === "ASSISTANT") {
+        contents.push({
+          role: "model",
+          parts: [{ text: message.content }],
+        });
+      }
+    }
+  }
+
+  // Add current user message
+  contents.push({
+    role: "user",
+    parts: [{ text: prompt }],
+  });
+
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: prompt,
+    contents: contents,
   });
   console.log(response.text);
   return response.text ?? "";

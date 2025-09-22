@@ -31,7 +31,7 @@ const startConversation: RequestHandler = async (req, res) => {
     const context = contextResults.map((result: any) => result.pageContent).join("\n\n");
 
     const [response, title] = await Promise.all([
-      generateContent(message, context),
+      generateContent(message, context, []), // Empty chat history for new conversation
       generateConversationTitle(message),
     ]);
 
