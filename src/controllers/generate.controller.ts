@@ -22,8 +22,7 @@ const generateContentController: RequestHandler = async (req, res) => {
 
 const startConversation: RequestHandler = async (req, res) => {
   const { message } = req.body as { message: string };
-  // const userId = (req as RequestWithAuth).auth?.userId;
-  const userId = "1111";
+  const userId = (req as RequestWithAuth).auth().userId;
 
   try {
     // Retrieve relevant context from vector store
@@ -43,19 +42,19 @@ const startConversation: RequestHandler = async (req, res) => {
       data: {
         title,
         user: {
-          connect: { id: parseInt(userId) },
+          connect: { id: userId },
         },
         messages: {
           create: [
             {
               content: message,
               sender: "USER",
-              userId: parseInt(userId),
+              userId: userId,
             },
             {
               content: response,
               sender: "ASSISTANT",
-              userId: parseInt(userId),
+              userId: userId,
             },
           ],
         },

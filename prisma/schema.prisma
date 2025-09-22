@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
+  id            String         @id @default(uuid())
   email         String         @unique
   name          String?
   imageUrl      String?
@@ -17,7 +17,7 @@ model User {
   updatedAt     DateTime       @updatedAt
   messages      Message[]
   conversations Conversation[]
-  PDFs         uploadedPDF[]
+  PDFs          uploadedPDF[]
 }
 
 model Conversation {
@@ -28,7 +28,7 @@ model Conversation {
   isShared   Boolean   @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-  userId     Int
+  userId     String
   messages   Message[]
   user       User      @relation(fields: [userId], references: [id])
 }
@@ -41,23 +41,21 @@ model Message {
   conversation   Conversation  @relation(fields: [conversationId], references: [id])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  userId         Int
+  userId         String
   user           User          @relation(fields: [userId], references: [id])
 }
 
 model uploadedPDF {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   title     String
   path      String
   subject   String
   semester  String
-  userId    Int
-  user      User      @relation(fields: [userId], references: [id])
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
-
 
 enum Role {
   USER

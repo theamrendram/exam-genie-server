@@ -37,9 +37,9 @@ const getAllUsers: RequestHandler = async (req, res) => {
 const getUserById: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = parseInt(id);
+    const userId = id;
 
-    if (isNaN(userId)) {
+    if (!userId) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
@@ -219,10 +219,10 @@ const syncUserFromClerk: RequestHandler = async (req, res) => {
 const updateUser: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = parseInt(id);
+    const userId = id;
     const { name, imageUrl, role } = req.body;
 
-    if (isNaN(userId)) {
+    if (!userId) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
@@ -296,9 +296,9 @@ const updateCurrentUser: RequestHandler = async (req, res) => {
 const deleteUser: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = parseInt(id);
+    const userId = id;
 
-    if (isNaN(userId)) {
+    if (!userId) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
@@ -354,7 +354,7 @@ const getUserMessages: RequestHandler = async (req, res) => {
 
     const whereClause: any = { userId };
     if (conversationId) {
-      whereClause.conversationId = parseInt(conversationId as string);
+      whereClause.conversationId = conversationId as string;
     }
 
     const messages = await prisma.message.findMany({

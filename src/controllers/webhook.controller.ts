@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { Webhook } from "svix";
 import prisma from "../utils/prisma-client";
 
+
 interface ClerkWebhookEvent {
   type: string;
   data: {
@@ -10,9 +11,9 @@ interface ClerkWebhookEvent {
       email_address: string;
       id: string;
     }>;
-    first_name?: string;
-    last_name?: string;
-    image_url?: string;
+    first_name?: string | null;
+    last_name?: string | null;
+    image_url?: string | null;
     created_at: number;
     updated_at: number;
   };
@@ -21,47 +22,45 @@ interface ClerkWebhookEvent {
 // Handle Clerk webhook events
 const handleWebhook: RequestHandler = async (req, res) => {
   try {
-    const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+    const WEBHOOK_SECRET =
+      process.env.CLERK_WEBHOOK_SIGNING_SECRET || process.env.CLERK_WEBHOOK_SECRET;
 
     if (!WEBHOOK_SECRET) {
       console.error("Missing CLERK_WEBHOOK_SECRET environment variable");
       return res.status(500).json({ error: "Webhook secret not configured" });
     }
 
-    // Get the headers
+    // Clerk sends these headers for verification
     const svix_id = req.headers["svix-id"] as string;
     const svix_timestamp = req.headers["svix-timestamp"] as string;
     const svix_signature = req.headers["svix-signature"] as string;
 
-    // If there are no headers, error out
     if (!svix_id || !svix_timestamp || !svix_signature) {
       return res.status(400).json({ error: "Missing svix headers" });
     }
 
-    // Get the body
-    const payload = JSON.stringify(req.body);
-
-    // Create a new Svix instance with your secret.
+    // Create webhook verifier
     const wh = new Webhook(WEBHOOK_SECRET);
 
     let evt: ClerkWebhookEvent;
-
-    // Verify the payload with the headers
     try {
-      evt = wh.verify(payload, {
-        "svix-id": svix_id,
-        "svix-timestamp": svix_timestamp,
-        "svix-signature": svix_signature,
-      }) as ClerkWebhookEvent;
+      evt = wh.verify(
+        req.body,
+        {
+          "svix-id": svix_id,
+          "svix-timestamp": svix_timestamp,
+          "svix-signature": svix_signature,
+        },
+      ) as ClerkWebhookEvent;
+
     } catch (err) {
-      console.error("Error verifying webhook:", err);
-      return res.status(400).json({ error: "Invalid webhook signature" });
+      console.error("❌ Webhook signature verification failed:", err);
+      return res.status(400).json({ error: "Invalid signature" });
     }
 
-    // Handle the webhook
+    // Extract event
     const { type, data } = evt;
-
-    console.log(`Webhook received: ${type}`);
+    console.log("✅ Webhook received:", type, "data:", data);
 
     switch (type) {
       case "user.created":
@@ -74,7 +73,7 @@ const handleWebhook: RequestHandler = async (req, res) => {
         await handleUserDeleted(data);
         break;
       default:
-        console.log(`Unhandled webhook event type: ${type}`);
+        console.log(`⚠️ Unhandled webhook event type: ${type}`);
     }
 
     res.status(200).json({ success: true });
@@ -85,7 +84,7 @@ const handleWebhook: RequestHandler = async (req, res) => {
 };
 
 // Handle user creation
-async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
+async function handleUserCreated(data: any) {
   console.log("handleUserCreated", data);
   try {
     const email = data.email_addresses[0]?.email_address;
@@ -109,6 +108,7 @@ async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
     const user = await prisma.user.create({
       data: {
         email,
+        id: data.id,
         name:
           data.first_name && data.last_name
             ? `${data.first_name} ${data.last_name}`
@@ -125,7 +125,7 @@ async function handleUserCreated(data: ClerkWebhookEvent["data"]) {
 }
 
 // Handle user updates
-async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
+async function handleUserUpdated(data: any) {
   console.log("handleUserUpdated", data);
   try {
     const email = data.email_addresses[0]?.email_address;
@@ -163,7 +163,7 @@ async function handleUserUpdated(data: ClerkWebhookEvent["data"]) {
 }
 
 // Handle user deletion
-async function handleUserDeleted(data: ClerkWebhookEvent["data"]) {
+async function handleUserDeleted(data: any) {
   console.log("handleUserDeleted", data);
   try {
     const email = data.email_addresses[0]?.email_address;

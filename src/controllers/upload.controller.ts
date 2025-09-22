@@ -1,18 +1,19 @@
 import { RequestHandler } from "express";
+import { getAuth } from "@clerk/express";
 import cloudinary from "../utils/cloudinary";
 import prisma from "../utils/prisma-client";
 import queue from "../utils/queue";
 
-interface RequestWithAuth extends Request {
-  auth: any;
-}
+// Using Clerk's getAuth(req) instead of augmenting Request type
 
 const uploadPDF: RequestHandler = async (req, res) => {
   console.log("calling upload controller");
   console.log("req.file:", req.file);
   const file = req.file;
-  // const userId = (req as unknown as RequestWithAuth).auth().userId;
-  const userId = 1111;
+  const { userId } = getAuth(req);
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
   const { title, subject, semester } = req.body;
 
   console.log("file: ", file);
@@ -48,8 +49,10 @@ const uploadPDF: RequestHandler = async (req, res) => {
 };
 
 const getPDFsByUserId: RequestHandler = async (req, res) => {
-  // const userId = (req as unknown as RequestWithAuth).auth?.userId;
-  const userId = 1111;
+  const { userId } = getAuth(req);
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
   const pdfs = await prisma.uploadedPDF.findMany({
     where: { userId: userId },
   });

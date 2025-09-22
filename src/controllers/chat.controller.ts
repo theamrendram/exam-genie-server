@@ -9,8 +9,7 @@ interface RequestWithAuth extends Request {
 
 const sendMessage: RequestHandler = async (req, res) => {
   const { message, conversationId } = req.body as { message: string; conversationId: number };
-  //   const userId = (req as RequestWithAuth).auth?.userId;
-  const userId = "1111";
+  const userId = (req as RequestWithAuth).auth().userId;
 
   try {
     if (!userId) {
@@ -25,7 +24,7 @@ const sendMessage: RequestHandler = async (req, res) => {
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: conversationId,
-        userId: parseInt(userId),
+        userId: userId,
       },
     });
 
@@ -39,7 +38,7 @@ const sendMessage: RequestHandler = async (req, res) => {
         content: message,
         sender: "USER",
         conversationId: conversationId,
-        userId: parseInt(userId),
+        userId: userId,
       },
     });
 
@@ -71,7 +70,7 @@ const sendMessage: RequestHandler = async (req, res) => {
         content: response,
         sender: "ASSISTANT",
         conversationId: conversationId,
-        userId: parseInt(userId),
+        userId: userId,
       },
     });
 
@@ -97,9 +96,7 @@ const sendMessage: RequestHandler = async (req, res) => {
 
 const getConversation: RequestHandler = async (req, res) => {
   const { conversationId } = req.params;
-  //   const userId = (req as RequestWithAuth).auth?.userId;
-  const userId = "1111";
-
+  const userId = (req as RequestWithAuth).auth().userId;
   try {
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -108,7 +105,7 @@ const getConversation: RequestHandler = async (req, res) => {
     const conversation = await prisma.conversation.findFirst({
       where: {
         id: parseInt(conversationId),
-        userId: parseInt(userId),
+        userId: userId,
       },
       include: {
         messages: {
@@ -144,8 +141,7 @@ const getConversation: RequestHandler = async (req, res) => {
 };
 
 const getConversations: RequestHandler = async (req, res) => {
-  //   const userId = (req as RequestWithAuth).auth?.userId;
-  const userId = "1111";
+  const userId = (req as RequestWithAuth).auth().userId;
 
   try {
     if (!userId) {
@@ -154,7 +150,7 @@ const getConversations: RequestHandler = async (req, res) => {
 
     const conversations = await prisma.conversation.findMany({
       where: {
-        userId: parseInt(userId),
+        userId: userId,
         isArchived: false,
       },
       include: {
