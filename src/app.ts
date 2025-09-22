@@ -1,15 +1,16 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import { clerkMiddleware, requireAuth } from "@clerk/express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import multer from "multer";
+import chatRoutes from "./routes/chat.route";
 import generateContentRoutes from "./routes/generate.route";
 import uploadRoutes from "./routes/upload.route";
 import userRoutes from "./routes/user.route";
 import webhookRoutes from "./routes/webhook.route";
 
-dotenv.config();
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use(clerkMiddleware());
 // Routes
 app.use("/api/upload", requireAuth(), upload.single("file"), uploadRoutes);
 app.use("/api/generate", requireAuth(), generateContentRoutes);
+app.use("/api/chat", requireAuth(), chatRoutes);
 
 app.get("/", (req, res) => {
   res.send("server is running...");

@@ -1,6 +1,7 @@
 import { Request, RequestHandler } from "express";
 import generateContent, { generateConversationTitle } from "../generate";
 import prisma from "../utils/prisma-client";
+import retrieveData from "../utils/retrieve-data";
 
 interface RequestWithAuth extends Request {
   auth: any;
@@ -21,11 +22,16 @@ const generateContentController: RequestHandler = async (req, res) => {
 
 const startConversation: RequestHandler = async (req, res) => {
   const { message } = req.body as { message: string };
-  const userId = (req as RequestWithAuth).auth?.userId;
+  // const userId = (req as RequestWithAuth).auth?.userId;
+  const userId = "1111";
 
   try {
+    // Retrieve relevant context from vector store
+    const contextResults = await retrieveData(message, 5);
+    const context = contextResults.map((result: any) => result.pageContent).join("\n\n");
+
     const [response, title] = await Promise.all([
-      generateContent(message),
+      generateContent(message, context),
       generateConversationTitle(message),
     ]);
 
@@ -37,11 +43,26 @@ const startConversation: RequestHandler = async (req, res) => {
       data: {
         title,
         user: {
-          connect: { id: userId },
+          connect: { id: parseInt(userId) },
+        },
+        messages: {
+          create: [
+            {
+              content: message,
+              sender: "USER",
+              userId: parseInt(userId),
+            },
+            {
+              content: response,
+              sender: "ASSISTANT",
+              userId: parseInt(userId),
+            },
+          ],
         },
       },
     });
 
+    console.log("conversation: ", conversation);
     res.json({ response, title, conversationId: conversation.id });
   } catch (error) {
     console.error("Error in startConversation:", error);
